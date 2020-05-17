@@ -1,0 +1,345 @@
+#include <ios#include <iostream>
+using namespace std;
+
+template<class DT>
+class SparseRow
+{
+	int rowNumber;
+	int colNumber;
+	DT _value;
+
+public:
+	SparseRow() {}
+	SparseRow<DT>(int aRowNumber, int aColNumber, DT a_value) { rowNumber = aRowNumber; colNumber = aColNumber; _value = a_value; }
+
+	//Getters
+	int getRowNumber() { return rowNumber; }
+	int getColNumber() { return colNumber; }
+	DT get_value() { return _value; }
+
+	//Setters
+	void setRowNumber(int a) { rowNumber = a; }
+	void setColNumber(int b) { colNumber = b; }
+	void set_value(DT c) { _value = c; }
+
+	//destructor
+	~SparseRow() {}
+};
+
+
+template <class DT>
+class SparseMatrix {
+protected:
+	SparseRow<DT> *mySparseRow;
+	int noSparseRows;
+	int noRows;
+	int noCols;
+	SparseRow<DT> *product;
+
+public:
+	//default constructor
+	SparseMatrix() {}
+	SparseMatrix(int c, int d) { noRows = c; noCols = d; }
+	SparseMatrix(SparseRow<DT>* a, int b, int c, int d) { mySparseRow = a; noSparseRows = b; noRows = c; noCols = d; }
+	
+	//Getters
+	int getNoRows() { return noRows; }
+	int getNoCols() { return noCols; }
+	int getNoSparseRows() { return noSparseRows; }
+	SparseRow<DT>* getMySparseRow() { return mySparseRow; }
+
+	//Create Sparse Matrix
+
+	SparseRow<DT>* createSparseMatrix(DT* mtrx, int noRows, int noCols) {
+		int input = 0;
+		int colCounter = 0;
+		int noRowsLoop = 0;
+		int noColsLoop = noCols;
+		int noSparseRows = setMySparseRow(mtrx, noRows, noCols);
+
+		DT value;
+		SparseRow<DT> matrixTemp;
+		SparseRow<DT> matrix[2];
+
+		//set up pointer to output
+		SparseRow<DT> *matrixPointer;
+		matrixPointer = &matrix[0];
+		int matrixCounter = 0;
+		for (int i = 0; i < (noRows*noCols); ++i) {
+			if (colCounter <= (noCols - 1)) {
+				value = *(mtrx + i);
+				if (*(mtrx + i) != input) {
+					SparseRow<float> matrixTemp(noRowsLoop, colCounter, value);
+					matrix[matrixCounter] = matrixTemp;
+					matrixCounter++;
+				}
+				noColsLoop++;
+				colCounter++;
+			}
+			else {
+				colCounter = 0;
+				noRowsLoop++;
+				i = i - 1;
+				noColsLoop = 0;
+			}
+		}
+		//mySparseRow = matrixPointer;
+		return matrixPointer;
+	}
+
+	//Get number of SparseMatrix noRows
+	int setMySparseRow(DT* mtrx, int noCols, int noRows) {
+		int input = 0;
+		char OverRideChoice;
+
+		cout << "Would you like to override the default value of 0 for creating the sparse matrix? Enter 'Y' or 'N'.  ";
+		cin >> OverRideChoice;
+
+		if (OverRideChoice == 'Y') {
+			cout << "Please enter the override value.  ";
+			cin >> input;
+		}
+
+		int noSparseRowsCounter = 0;
+		for (int j = 0; j < (noRows*noCols); j++) {
+			if (*(mtrx + j) != input) {
+				noSparseRowsCounter++;
+			}
+		}
+		noSparseRows = noSparseRowsCounter++;
+		return noSparseRows;
+	}
+
+
+
+
+
+	//Search Sparse Row Method
+	DT searchSparseRows(SparseRow<DT>* mtrx, int rowNum, int colNum, int noSparseRows, bool disableMessage) {
+
+		for (int a = 0; a < noSparseRows; a++) {
+			SparseRow<DT> temp;
+			temp = *(mtrx + a);
+			if (temp.getRowNumber() == rowNum && temp.getColNumber() == colNum) {
+				cout << temp.get_value();
+				return temp.get_value();
+			}
+		}
+		if (disableMessage == false) {
+			cout << "The row and column you are searching for either had a value equal to 0 (or equal to the user provided override value) or are out of the matrix range.";
+		}
+		//return 0 so that the matrix multiplication method can conditionally skip everything that returns 0.
+		return 0;
+	}
+
+
+	//Setters
+	void setNoRows(int a) { noRows = a; }
+	void setNoCols(int b) { noCols = b; }
+	void setNoSparseRows(int c) { noSparseRows = c; }
+	void setMySparseRow(SparseRow<DT>* d) { mySparseRow = d; }
+
+	//Destructor	
+	~SparseMatrix() {}
+};
+
+
+int main() {
+
+	float arr1[3][3] = { {3,0,0},{0,12,0},{0,0,22} };
+	float* pt1;
+	pt1 = &arr1[0][0];
+
+	SparseMatrix<float> testSparseMatrix(3, 3);
+	SparseRow<float>* testSparseRow;
+	testSparseRow = testSparseMatrix.createSparseMatrix(pt1, 3, 3);
+
+	SparseRow<float> SparseMatrixTestNotPointer;
+	SparseMatrixTestNotPointer = *(testSparseRow + 1);
+	float test_value = SparseMatrixTestNotPointer.get_value();
+	cout << test_value << endl;
+
+	SparseRow<float> SparseMatrixTestNotPointer1;
+	SparseMatrixTestNotPointer1 = *(testSparseRow);
+	float test_value1 = SparseMatrixTestNotPointer1.get_value();
+	cout << test_value1 << endl;
+
+	SparseRow<float> SparseMatrixTestNotPointer2;
+	SparseMatrixTestNotPointer2 = *(testSparseRow + 2);
+	float test_value2 = SparseMatrixTestNotPointer2.get_value();
+	cout << test_value2 << endl;
+
+};
+tream>
+using namespace std;
+
+template<class DT>
+class SparseRow
+{
+	int rowNumber;
+	int colNumber;
+	DT _value;
+
+public:
+	SparseRow() {}
+	SparseRow<DT>(int aRowNumber, int aColNumber, DT a_value) { rowNumber = aRowNumber; colNumber = aColNumber; _value = a_value; }
+
+	//Getters
+	int getRowNumber() { return rowNumber; }
+	int getColNumber() { return colNumber; }
+	DT get_value() { return _value; }
+
+	//Setters
+	void setRowNumber(int a) { rowNumber = a; }
+	void setColNumber(int b) { colNumber = b; }
+	void set_value(DT c) { _value = c; }
+
+	//destructor
+	~SparseRow() {}
+};
+
+
+template <class DT>
+class SparseMatrix {
+protected:
+	SparseRow<DT> *mySparseRow;
+	int noSparseRows;
+	int noRows;
+	int noCols;
+	SparseRow<DT> *product;
+
+public:
+	//default constructor
+	SparseMatrix() {}
+	SparseMatrix(int c, int d) { noRows = c; noCols = d; }
+	SparseMatrix(SparseRow<DT>* a, int b, int c, int d) { mySparseRow = a; noSparseRows = b; noRows = c; noCols = d; }
+	
+	//Getters
+	int getNoRows() { return noRows; }
+	int getNoCols() { return noCols; }
+	int getNoSparseRows() { return noSparseRows; }
+	SparseRow<DT>* getMySparseRow() { return mySparseRow; }
+
+	//Create Sparse Matrix
+
+	SparseRow<DT>* createSparseMatrix(DT* mtrx, int noRows, int noCols) {
+		int input = 0;
+		int colCounter = 0;
+		int noRowsLoop = 0;
+		int noColsLoop = noCols;
+		int noSparseRows = setMySparseRow(mtrx, noRows, noCols);
+
+		DT value;
+		SparseRow<DT> matrixTemp;
+		SparseRow<DT> matrix[2];
+
+		//set up pointer to output
+		SparseRow<DT> *matrixPointer;
+		matrixPointer = &matrix[0];
+		int matrixCounter = 0;
+		for (int i = 0; i < (noRows*noCols); ++i) {
+			if (colCounter <= (noCols - 1)) {
+				value = *(mtrx + i);
+				if (*(mtrx + i) != input) {
+					SparseRow<float> matrixTemp(noRowsLoop, colCounter, value);
+					matrix[matrixCounter] = matrixTemp;
+					matrixCounter++;
+				}
+				noColsLoop++;
+				colCounter++;
+			}
+			else {
+				colCounter = 0;
+				noRowsLoop++;
+				i = i - 1;
+				noColsLoop = 0;
+			}
+		}
+		//mySparseRow = matrixPointer;
+		return matrixPointer;
+	}
+
+	//Get number of SparseMatrix noRows
+	int setMySparseRow(DT* mtrx, int noCols, int noRows) {
+		int input = 0;
+		char OverRideChoice;
+
+		cout << "Would you like to override the default value of 0 for creating the sparse matrix? Enter 'Y' or 'N'.  ";
+		cin >> OverRideChoice;
+
+		if (OverRideChoice == 'Y') {
+			cout << "Please enter the override value.  ";
+			cin >> input;
+		}
+
+		int noSparseRowsCounter = 0;
+		for (int j = 0; j < (noRows*noCols); j++) {
+			if (*(mtrx + j) != input) {
+				noSparseRowsCounter++;
+			}
+		}
+		noSparseRows = noSparseRowsCounter++;
+		return noSparseRows;
+	}
+
+
+
+
+
+	//Search Sparse Row Method
+	DT searchSparseRows(SparseRow<DT>* mtrx, int rowNum, int colNum, int noSparseRows, bool disableMessage) {
+
+		for (int a = 0; a < noSparseRows; a++) {
+			SparseRow<DT> temp;
+			temp = *(mtrx + a);
+			if (temp.getRowNumber() == rowNum && temp.getColNumber() == colNum) {
+				cout << temp.get_value();
+				return temp.get_value();
+			}
+		}
+		if (disableMessage == false) {
+			cout << "The row and column you are searching for either had a value equal to 0 (or equal to the user provided override value) or are out of the matrix range.";
+		}
+		//return 0 so that the matrix multiplication method can conditionally skip everything that returns 0.
+		return 0;
+	}
+
+
+	//Setters
+	void setNoRows(int a) { noRows = a; }
+	void setNoCols(int b) { noCols = b; }
+	void setNoSparseRows(int c) { noSparseRows = c; }
+	void setMySparseRow(SparseRow<DT>* d) { mySparseRow = d; }
+
+	//Destructor	
+	~SparseMatrix() {}
+};
+
+
+int main() {
+
+	float arr1[3][3] = { {3,0,0},{0,12,0},{0,0,22} };
+	float* pt1;
+	pt1 = &arr1[0][0];
+
+	SparseMatrix<float> testSparseMatrix(3, 3);
+	SparseRow<float>* testSparseRow;
+	testSparseRow = testSparseMatrix.createSparseMatrix(pt1, 3, 3);
+
+	SparseRow<float> SparseMatrixTestNotPointer;
+	SparseMatrixTestNotPointer = *(testSparseRow + 1);
+	float test_value = SparseMatrixTestNotPointer.get_value();
+	cout << test_value << endl;
+
+	SparseRow<float> SparseMatrixTestNotPointer1;
+	SparseMatrixTestNotPointer1 = *(testSparseRow);
+	float test_value1 = SparseMatrixTestNotPointer1.get_value();
+	cout << test_value1 << endl;
+
+	SparseRow<float> SparseMatrixTestNotPointer2;
+	SparseMatrixTestNotPointer2 = *(testSparseRow + 2);
+	float test_value2 = SparseMatrixTestNotPointer2.get_value();
+	cout << test_value2 << endl;
+
+};
+
